@@ -1,0 +1,1613 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>TapTable QR Generator — Advanced</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Шрифты для текста -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@400;600;700&family=Roboto:wght@400;700&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    .hidden { display: none !important; }
+    :root {
+      --bg: #f5f5f7;
+      --panel: #ffffff;
+      --accent: #2563eb;
+      --accent-soft: rgba(37, 99, 235, 0.06);
+      --border: #e5e7eb;
+      --border-strong: #d1d5db;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --pill-bg: #f3f4f6;
+      --shadow-soft: 0 14px 40px rgba(148, 163, 184, 0.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #f9fafb 0, #eef2ff 40%, #e5e7eb 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      padding: 16px;
+    }
+    .app {
+      max-width: 1280px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 980px) {
+      .app { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--panel);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+      padding: 18px 18px 20px;
+    }
+    h1 {
+      font-size: 22px;
+      margin: 0 0 4px;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    h1 span.logo-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: radial-gradient(circle, #60a5fa 0, #2563eb 40%, rgba(37,99,235,0.4) 70%);
+      box-shadow: 0 0 14px rgba(37,99,235,0.8);
+      display: inline-block;
+    }
+    .subtitle {
+      margin: 0 0 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .hint-print {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .hint-print strong {
+      font-weight: 600;
+    }
+    .section-title {
+      margin: 10px 0 4px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+    .section-title span {
+      background: #eef2ff;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.5);
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .field {
+      margin-bottom: 8px;
+    }
+    .field label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .field label span.main {
+      color: var(--text-main);
+      font-size: 13px;
+    }
+    .field small {
+      font-size: 11px;
+      color: var(--text-muted);
+      opacity: 0.8;
+    }
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+      transition: border 0.15s, box-shadow 0.15s, background 0.15s, transform 0.06s;
+    }
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.25);
+      background: #ffffff;
+      transform: translateY(-0.5px);
+    }
+    input[type="color"] {
+      width: 100%;
+      height: 32px;
+      padding: 0;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      cursor: pointer;
+      outline: none;
+    }
+    input[type="file"] {
+      width: 100%;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    button.primary {
+      width: 100%;
+      margin-top: 6px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #ffffff;
+      box-shadow: 0 12px 30px rgba(37,99,235,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.08s ease-out, box-shadow 0.08s ease-out, filter 0.08s ease-out, opacity 0.1s;
+      font-family: "Inter", system-ui, sans-serif;
+    }
+    button.primary:disabled {
+      opacity: 0.6;
+      cursor: default;
+      box-shadow: none;
+    }
+    button.primary:not(:disabled):hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 40px rgba(37,99,235,0.45);
+      filter: brightness(1.03);
+    }
+    button.primary:not(:disabled):active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 8px 20px rgba(37,99,235,0.35);
+      filter: brightness(0.96);
+    }
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .btn-secondary,
+    .btn-mini {
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border-strong);
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.12s, border 0.12s, transform 0.06s, box-shadow 0.1s;
+      font-family: "Inter", system-ui, sans-serif;
+    }
+    .btn-secondary {
+      flex: 1;
+    }
+    .btn-secondary:hover,
+    .btn-mini:hover {
+      background: #eff6ff;
+      border-color: rgba(37,99,235,0.5);
+      transform: translateY(-0.5px);
+      box-shadow: 0 4px 18px rgba(148,163,184,0.5);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #1d4ed8;
+      font-size: 11px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(37,99,235,0.12);
+    }
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34,197,94,0.7);
+    }
+    .row-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .preview-header h2 {
+      margin: 0;
+      font-size: 14px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .preview-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .preview-container {
+      margin-top: 8px;
+      border-radius: 16px;
+      border: 1px dashed rgba(209,213,219,0.9);
+      padding: 10px;
+      background: linear-gradient(135deg, #f9fafb, #eef2ff);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: stretch;
+      justify-content: center;
+    }
+    .preview-inner {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      /* aspect-ratio: 2/3; (dynamic now) */
+      border-radius: 14px;
+      overflow: hidden;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-inner img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    .preview-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .preview-steps {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+    }
+    .pill {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      font-size: 11px;
+      background: var(--pill-bg);
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .pill strong {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+    .status {
+      font-size: 11px;
+      margin-top: 5px;
+      color: var(--text-muted);
+      min-height: 14px;
+    }
+    .status.ok { color: #16a34a; }
+    .status.err { color: #dc2626; }
+    .status span.dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      margin-right: 4px;
+      background: currentColor;
+    }
+    .saved-design-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .saved-design-actions .btn-mini {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <h1><span class="logo-dot"></span> TapTable QR Generator</h1>
+      <p class="subtitle">
+        Расширенный режим: настраивай размер полотна, позицию и размер QR, добавляй несколько логотипов и несколько текстов с индивидуальными параметрами.
+      </p>
+      <p class="hint-print">
+        Для печати в типографии укажи размер полотна под <strong>300 DPI</strong>.
+        Например, A4: примерно <strong>2480×3508 px</strong>.
+      </p>
+
+      <div class="badge">
+        <span class="badge-dot"></span>
+        Всё рендерится локально в браузере
+      </div>
+
+      <div class="section-title"><span>Полотно</span></div>
+      <div class="grid-2">
+        <div class="field">
+          <label><span class="main">Ширина полотна</span><small>px</small></label>
+          <input id="canvasWidth" type="number" min="200" max="8000" value="800" />
+        </div>
+        <div class="field">
+          <label><span class="main">Высота полотна</span><small>px</small></label>
+          <input id="canvasHeight" type="number" min="200" max="8000" value="1200" />
+        </div>
+      </div>
+
+      
+<div class="section-title"><span>Общие настройки</span></div>
+
+      <div class="field">
+        <label>
+          <span class="main">Тип данных в QR</span>
+        </label>
+        <select id="qrContentType">
+          <option value="url">Ссылка (меню/сайт)</option>
+          <option value="wifi">Wi-Fi подключение</option>
+        </select>
+        <small>
+          В режиме «Ссылка» используется базовый URL или CSV.
+          В режиме «Wi-Fi» все QR содержат данные сети Wi-Fi (SSID/пароль).
+        </small>
+      </div>
+
+      <!-- НАСТРОЙКИ ДЛЯ РЕЖИМА "ССЫЛКА" -->
+      <div id="qrUrlSettings">
+        <div class="field">
+          <label><span class="main">Базовый URL меню</span><small>используй <strong>{n}</strong> для подстановки номера стола</small></label>
+          <input id="baseUrl" type="text" value="https://example.com/menu?table=" />
+        </div>
+
+        <div class="field">
+          <label>
+            <span class="main">CSV со ссылками на столы</span>
+            <small>1-й столбец: номер стола, 2-й: ссылка (URL). Можно с заголовком.</small>
+          </label>
+          <div class="row" style="gap:10px; align-items:center;">
+            <input id="csvFile" type="file" accept=".csv,text/csv" />
+            <label class="chip" style="display:flex; align-items:center; gap:8px;">
+              <input id="useCsvLinks" type="checkbox" />
+              <span>Использовать CSV</span>
+            </label>
+            <button id="clearCsv" class="btn-mini" type="button">Очистить</button>
+          </div>
+          <small id="csvInfo" style="display:block; margin-top:6px; opacity:.85;">
+            CSV не загружен — будет использоваться базовый URL + номер стола.
+          </small>
+        </div>
+      </div>
+
+      <!-- НАСТРОЙКИ ДЛЯ РЕЖИМА "WI-FI" -->
+      <div id="qrWifiSettings" class="hidden">
+        <div class="field">
+          <label><span class="main">SSID сети (название Wi-Fi)</span></label>
+          <input id="wifiSsid" type="text" placeholder="TapTable Wi-Fi" />
+        </div>
+        <div class="field">
+          <label><span class="main">Пароль Wi-Fi</span></label>
+          <input id="wifiPassword" type="text" placeholder="Пароль от Wi-Fi" />
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label><span class="main">Тип шифрования</span></label>
+            <select id="wifiAuthType">
+              <option value="WPA">WPA/WPA2</option>
+              <option value="WEP">WEP</option>
+              <option value="nopass">Без пароля (открытая сеть)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="toggle" style="display:flex; align-items:center; gap:8px; margin-top:18px;">
+              <input id="wifiHidden" type="checkbox" />
+              <span>Сеть скрыта (Hidden SSID)</span>
+            </label>
+          </div>
+        </div>
+        <small>
+          Эти настройки одинаковы для всех QR-кодов (одна сеть Wi-Fi для всех столов).
+          Номер стола продолжит отображаться как текст, если он настроен в блоке «Текстовые объекты».
+        </small>
+      </div>
+
+
+<div class="grid-2">
+        <div class="field">
+          <label><span class="main">Количество столов</span><small>1–999</small></label>
+          <input id="tableCount" type="number" min="1" max="999" value="10" />
+        </div>
+        <div class="field">
+          <label><span class="main">Номер для предпросмотра</span></label>
+          <input id="previewIndex" type="number" min="1" value="1" />
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label><span class="main">Цвет фона полотна</span></label>
+          <input id="bgColor" type="color" value="#ffffff" />
+        </div>
+        <div class="field">
+          <label><span class="main">Цвет по умолчанию для текста</span></label>
+          <input id="defaultTextColor" type="color" value="#000000" />
+        </div>
+      </div>
+
+      <div class="section-title"><span>QR-код</span></div>
+      <div class="grid-2">
+        <div class="field">
+          <label><span class="main">Цвет QR</span></label>
+          <input id="qrColor" type="color" value="#000000" />
+        </div>
+        <div class="field">
+          <label><span class="main">Размер стороны</span><small>px (квадрат)</small></label>
+          <input id="qrSize" type="number" min="100" max="3000" value="600" />
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label><span class="main">Позиция X</span><small>px (левый край)</small></label>
+          <input id="qrX" type="number" value="100" />
+        </div>
+        <div class="field">
+          <label><span class="main">Позиция Y</span><small>px (верхний край)</small></label>
+          <input id="qrY" type="number" value="150" />
+        
+      <div class="section-title"><span>Логотип в центре QR</span></div>
+      <div class="grid-2">
+        <div class="field">
+          <label class="toggle">
+            <input id="qrCenterLogoEnabled" type="checkbox" />
+            <span>Вставлять активный логотип в центр QR</span>
+          </label>
+          <div class="help">Берётся текущий “Активный логотип” из секции «Логотипы».</div>
+        </div>
+        <div class="field">
+          <label><span class="main">Размер логотипа</span><small>% от стороны QR</small></label>
+          <input id="qrCenterLogoPercent" type="number" min="10" max="40" value="22" />
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label><span class="main">Подложка вокруг логотипа</span><small>% от размера логотипа</small></label>
+          <input id="qrCenterLogoPaddingPercent" type="number" min="0" max="60" value="18" />
+        </div>
+        <div class="field">
+          <label><span class="main">Скругление подложки</span><small>px</small></label>
+          <input id="qrCenterLogoRadius" type="number" min="0" max="80" value="14" />
+        </div>
+      </div>
+</div>
+      </div>
+
+      <div class="section-title"><span>Текстовые объекты</span></div>
+      <div class="row-between" style="margin-bottom:6px;">
+        <div class="field" style="flex:1; margin-bottom:0;">
+          <label><span class="main">Активный текст</span></label>
+          <select id="textSelect"></select>
+        </div>
+        <button id="addTextBtn" class="btn-mini" type="button">+ Добавить текст</button>
+        <button id="removeTextBtn" class="btn-mini" type="button">Удалить</button>
+      </div>
+      <div class="field">
+        <label><span class="main">Шаблон текста</span><small>{n} заменится на номер стола</small></label>
+        <input id="textTemplateInput" type="text" />
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label><span class="main">X (якорь текста)</span><small>зависит от выравнивания</small></label>
+          <input id="textXInput" type="number" />
+        </div>
+        <div class="field">
+          <label><span class="main">Y (центр текста)</span></label>
+          <input id="textYInput" type="number" />
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label><span class="main">Размер шрифта</span><small>px</small></label>
+          <input id="textSizeInput" type="number" />
+        </div>
+        <div class="field">
+          <label><span class="main">Цвет текста</span></label>
+          <input id="textColorInput" type="color" />
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label><span class="main">Шрифт текста</span></label>
+          <select id="textFontInput">
+            <option value="Inter">Inter</option>
+            <option value="Montserrat">Montserrat</option>
+            <option value="Roboto">Roboto</option>
+            <option value="Playfair Display">Playfair Display</option>
+            <option value="Arial">Arial</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="system-ui">System</option>
+          </select>
+        </div>
+        <div class="field">
+          <label><span class="main">Поворот текста</span><small>° (по часовой)</small></label>
+          <input id="textRotationInput" type="number" value="0" />
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label><span class="main">Выравнивание текста по X</span><small>к левому/центру/правому краю</small></label>
+          <select id="textAlignInput">
+            <option value="left">Слева</option>
+            <option value="center">По центру</option>
+            <option value="right">Справа</option>
+          </select>
+        </div>
+        <div class="field">
+          <label><span class="main">Подсказка</span></label>
+          <small>
+            При «Слева» X — это левый край текста, при «Справа» — правый, при «По центру» — центр.
+          </small>
+        </div>
+      </div>
+
+
+      <div class="section-title"><span>Логотипы</span></div>
+      <div class="row-between" style="margin-bottom:6px;">
+        <div class="field" style="flex:1; margin-bottom:0;">
+          <label><span class="main">Активный логотип</span></label>
+          <select id="logoSelect"></select>
+        </div>
+        <label class="btn-mini" style="cursor:pointer;">
+          <input id="logoFileInput" type="file" accept="image/*" style="display:none;" />
+          + Добавить логотип
+        </label>
+        <button id="removeLogoBtn" class="btn-mini" type="button">Удалить</button>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label><span class="main">X (центр логотипа)</span></label>
+          <input id="logoXInput" type="number" />
+        </div>
+        <div class="field">
+          <label><span class="main">Y (центр логотипа)</span></label>
+          <input id="logoYInput" type="number" />
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label><span class="main">Ширина логотипа</span><small>px, высота по пропорциям</small></label>
+          <input id="logoWidthInput" type="number" />
+        </div>
+        <div class="field">
+          <label><span class="main">Поворот логотипа</span><small>°</small></label>
+          <input id="logoRotationInput" type="number" value="0" />
+        </div>
+      </div>
+
+      <button id="previewBtn" class="primary" type="button">
+        <span>Обновить предпросмотр</span>
+      </button>
+
+      <div class="btn-row">
+        <button id="downloadOneBtn" class="btn-secondary" type="button">
+          <span>PNG для выбранного стола</span>
+        </button>
+        <button id="downloadAllBtn" class="btn-secondary" type="button">
+          <span>ZIP для всех столов</span>
+        </button>
+      </div>
+
+      <div class="section-title"><span>Сохранённые дизайны</span></div>
+      <div class="field">
+        <label><span class="main">Название дизайна</span><small>сохраняется в браузере</small></label>
+        <input id="designName" type="text" placeholder="Например: Синий A4 с логотипом" />
+      </div>
+      <button id="saveDesignBtn" class="btn-secondary" type="button" style="width:100%;">
+        <span>Сохранить текущий дизайн</span>
+      </button>
+      <div class="field" style="margin-top:8px;">
+        <label><span class="main">Выбрать сохранённый дизайн</span></label>
+        <select id="savedDesignSelect"></select>
+      </div>
+      <div class="saved-design-actions">
+        <button id="loadDesignBtn" class="btn-mini" type="button">Загрузить</button>
+        <button id="deleteDesignBtn" class="btn-mini" type="button">Удалить</button>
+      </div>
+
+      <div id="status" class="status"></div>
+    </div>
+
+    <div class="card">
+      <div class="preview-header">
+        <h2>Предпросмотр таблички</h2>
+        <div class="preview-meta">
+          Номер стола: <span id="previewTableNumber">1</span>
+        </div>
+      </div>
+      <div class="preview-container">
+        <div class="preview-inner">
+          <img id="previewImg" alt="Предпросмотр таблички" />
+        </div>
+        <div class="preview-info">
+          <div class="preview-steps">
+            <span>Настрой координаты и поворот объектов,</span>
+            <span>обнови предпросмотр,</span>
+            <span>скачай макеты для печати.</span>
+          </div>
+        </div>
+        <div class="preview-steps">
+          <div class="pill">
+            <span>Шаблон URL: <strong id="pillUrl">https://example.com/menu?table=1</strong></span>
+          </div>
+          <div class="pill">
+            <span>Размер полотна: <strong id="pillCanvas">800×1200 px</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- библиотеки -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script>
+    const canvasWidthEl = document.getElementById('canvasWidth');
+    const canvasHeightEl = document.getElementById('canvasHeight');
+
+    const qrContentTypeEl = document.getElementById('qrContentType');
+    const qrUrlSettingsEl = document.getElementById('qrUrlSettings');
+    const qrWifiSettingsEl = document.getElementById('qrWifiSettings');
+
+    const wifiSsidEl = document.getElementById('wifiSsid');
+    const wifiPasswordEl = document.getElementById('wifiPassword');
+    const wifiAuthTypeEl = document.getElementById('wifiAuthType');
+    const wifiHiddenEl = document.getElementById('wifiHidden');
+
+    const baseUrlEl = document.getElementById('baseUrl');
+    const csvFileEl = document.getElementById('csvFile');
+    const useCsvLinksEl = document.getElementById('useCsvLinks');
+    const clearCsvEl = document.getElementById('clearCsv');
+    const csvInfoEl = document.getElementById('csvInfo');
+
+    const tableCountEl = document.getElementById('tableCount');
+    const previewIndexEl = document.getElementById('previewIndex');
+
+    let csvLinksMap = new Map();
+    let csvLinksLoaded = false;
+
+    if (qrContentTypeEl) {
+      qrContentTypeEl.addEventListener('change', () => {
+        const mode = qrContentTypeEl.value;
+        if (mode === 'wifi') {
+          qrUrlSettingsEl.classList.add('hidden');
+          qrWifiSettingsEl.classList.remove('hidden');
+          setStatus('Режим QR: Wi-Fi подключение.', true);
+        } else {
+          qrUrlSettingsEl.classList.remove('hidden');
+          qrWifiSettingsEl.classList.add('hidden');
+          setStatus('Режим QR: ссылка (меню/сайт).', true);
+        }
+      });
+    }
+
+
+
+    const bgColorEl = document.getElementById('bgColor');
+    const defaultTextColorEl = document.getElementById('defaultTextColor');
+
+    const qrColorEl = document.getElementById('qrColor');
+    const qrSizeEl = document.getElementById('qrSize');
+    const qrXEl = document.getElementById('qrX');
+    const qrYEl = document.getElementById('qrY');
+
+    const qrCenterLogoEnabledEl = document.getElementById('qrCenterLogoEnabled');
+    const qrCenterLogoPercentEl = document.getElementById('qrCenterLogoPercent');
+    const qrCenterLogoPaddingPercentEl = document.getElementById('qrCenterLogoPaddingPercent');
+    const qrCenterLogoRadiusEl = document.getElementById('qrCenterLogoRadius');
+
+    const textSelectEl = document.getElementById('textSelect');
+    const addTextBtn = document.getElementById('addTextBtn');
+    const removeTextBtn = document.getElementById('removeTextBtn');
+    const textTemplateInput = document.getElementById('textTemplateInput');
+    const textXInput = document.getElementById('textXInput');
+    const textYInput = document.getElementById('textYInput');
+    const textSizeInput = document.getElementById('textSizeInput');
+    const textColorInput = document.getElementById('textColorInput');
+    const textFontInput = document.getElementById('textFontInput');
+    const textRotationInput = document.getElementById('textRotationInput');
+    const textAlignInput = document.getElementById('textAlignInput');
+
+    const logoSelectEl = document.getElementById('logoSelect');
+    const logoFileInput = document.getElementById('logoFileInput');
+    const removeLogoBtn = document.getElementById('removeLogoBtn');
+    const logoXInput = document.getElementById('logoXInput');
+    const logoYInput = document.getElementById('logoYInput');
+    const logoWidthInput = document.getElementById('logoWidthInput');
+    const logoRotationInput = document.getElementById('logoRotationInput');
+
+    const previewBtn = document.getElementById('previewBtn');
+    const downloadOneBtn = document.getElementById('downloadOneBtn');
+    const downloadAllBtn = document.getElementById('downloadAllBtn');
+    const designNameEl = document.getElementById('designName');
+    const saveDesignBtn = document.getElementById('saveDesignBtn');
+    const savedDesignSelectEl = document.getElementById('savedDesignSelect');
+    const loadDesignBtn = document.getElementById('loadDesignBtn');
+    const deleteDesignBtn = document.getElementById('deleteDesignBtn');
+
+    const statusEl = document.getElementById('status');
+    const previewImg = document.getElementById('previewImg');
+    const previewTableNumberEl = document.getElementById('previewTableNumber');
+    const pillUrlEl = document.getElementById('pillUrl');
+    const pillCanvasEl = document.getElementById('pillCanvas');
+
+    let textObjects = [];
+    let logoObjects = [];
+    let textIdCounter = 1;
+    let logoIdCounter = 1;
+    const savedDesignsStorageKey = 'taptable_qr_saved_designs_v1';
+
+    function setStatus(message, ok) {
+      statusEl.textContent = message || '';
+      statusEl.classList.remove('ok', 'err');
+      if (!message) return;
+      statusEl.classList.add(ok ? 'ok' : 'err');
+      statusEl.innerHTML = '<span class="dot"></span>' + message;
+    }
+
+    
+    function roundRectPath(ctx, x, y, w, h, r) {
+      const radius = Math.max(0, Math.min(r, Math.min(w, h) / 2));
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.arcTo(x + w, y, x + w, y + h, radius);
+      ctx.arcTo(x + w, y + h, x, y + h, radius);
+      ctx.arcTo(x, y + h, x, y, radius);
+      ctx.arcTo(x, y, x + w, y, radius);
+      ctx.closePath();
+    }
+function createDefaultText() {
+      const canvasW = parseInt(canvasWidthEl.value || '800', 10);
+      const canvasH = parseInt(canvasHeightEl.value || '1200', 10);
+      return {
+        id: textIdCounter++,
+        template: 'Стол {n}',
+        x: canvasW / 2,
+        y: canvasH - 120,
+        size: 80,
+        color: defaultTextColorEl.value || '#000000',
+        font: 'Inter',
+        rotation: 0,
+        align: 'center'
+      };
+    }
+
+    function refreshTextSelect() {
+      const currentId = getCurrentTextId();
+      textSelectEl.innerHTML = '';
+      textObjects.forEach((t, index) => {
+        const opt = document.createElement('option');
+        opt.value = String(t.id);
+        opt.textContent = `Текст ${index + 1}`;
+        textSelectEl.appendChild(opt);
+      });
+      if (textObjects.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Нет текстов';
+        textSelectEl.appendChild(opt);
+      }
+      setCurrentTextId(currentId || (textObjects[0] && textObjects[0].id) || '');
+      syncTextUI();
+    }
+
+    function getCurrentTextId() {
+      return textSelectEl.value ? parseInt(textSelectEl.value, 10) : null;
+    }
+    function setCurrentTextId(id) {
+      if (!id) return;
+      textSelectEl.value = String(id);
+    }
+    function getCurrentTextObj() {
+      const id = getCurrentTextId();
+      return textObjects.find(t => t.id === id) || null;
+    }
+
+    function syncTextUI() {
+      const t = getCurrentTextObj();
+      const disabled = !t;
+      [textTemplateInput, textXInput, textYInput, textSizeInput, textColorInput, textFontInput, textRotationInput, textAlignInput, removeTextBtn]
+        .forEach(el => el.disabled = disabled);
+      if (!t) {
+        textTemplateInput.value = '';
+        textXInput.value = '';
+        textYInput.value = '';
+        textSizeInput.value = '';
+        textColorInput.value = defaultTextColorEl.value || '#000000';
+        textFontInput.value = 'Inter';
+        textRotationInput.value = 0;
+        if (textAlignInput) textAlignInput.value = 'center';
+        return;
+      }
+      textTemplateInput.value = t.template;
+      textXInput.value = t.x;
+      textYInput.value = t.y;
+      textSizeInput.value = t.size;
+      textColorInput.value = t.color;
+      textFontInput.value = t.font;
+      textRotationInput.value = t.rotation || 0;
+      if (textAlignInput) textAlignInput.value = t.align || 'center';
+    }
+
+    addTextBtn.addEventListener('click', () => {
+      const t = createDefaultText();
+      textObjects.push(t);
+      refreshTextSelect();
+      setCurrentTextId(t.id);
+      syncTextUI();
+      setStatus('Добавлен новый текстовый объект.', true);
+    });
+
+    removeTextBtn.addEventListener('click', () => {
+      const id = getCurrentTextId();
+      if (!id) return;
+      textObjects = textObjects.filter(t => t.id !== id);
+      refreshTextSelect();
+      setStatus('Текстовый объект удалён.', true);
+    });
+
+    textSelectEl.addEventListener('change', () => {
+      syncTextUI();
+    });
+
+    textTemplateInput.addEventListener('input', () => {
+      const t = getCurrentTextObj();
+      if (!t) return;
+      t.template = textTemplateInput.value;
+    });
+    textXInput.addEventListener('input', () => {
+      const t = getCurrentTextObj();
+      if (!t) return;
+      t.x = parseFloat(textXInput.value || '0');
+    });
+    textYInput.addEventListener('input', () => {
+      const t = getCurrentTextObj();
+      if (!t) return;
+      t.y = parseFloat(textYInput.value || '0');
+    });
+    textSizeInput.addEventListener('input', () => {
+      const t = getCurrentTextObj();
+      if (!t) return;
+      t.size = parseFloat(textSizeInput.value || '12');
+    });
+    textColorInput.addEventListener('input', () => {
+      const t = getCurrentTextObj();
+      if (!t) return;
+      t.color = textColorInput.value || '#000000';
+    });
+    textFontInput.addEventListener('change', () => {
+      const t = getCurrentTextObj();
+      if (!t) return;
+      t.font = textFontInput.value || 'Inter';
+    });
+    textRotationInput.addEventListener('input', () => {
+      const t = getCurrentTextObj();
+      if (!t) return;
+      t.rotation = parseFloat(textRotationInput.value || '0');
+    });
+
+    if (textAlignInput) {
+      textAlignInput.addEventListener('change', () => {
+        const t = getCurrentTextObj();
+        if (!t) return;
+        t.align = textAlignInput.value || 'center';
+      });
+    }
+
+    function refreshLogoSelect() {
+      const currentId = getCurrentLogoId();
+      logoSelectEl.innerHTML = '';
+      logoObjects.forEach((l, index) => {
+        const opt = document.createElement('option');
+        opt.value = String(l.id);
+        opt.textContent = l.label || `Лого ${index + 1}`;
+        logoSelectEl.appendChild(opt);
+      });
+      if (logoObjects.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Нет логотипов';
+        logoSelectEl.appendChild(opt);
+      }
+      setCurrentLogoId(currentId || (logoObjects[0] && logoObjects[0].id) || '');
+      syncLogoUI();
+    }
+
+    function getCurrentLogoId() {
+      return logoSelectEl.value ? parseInt(logoSelectEl.value, 10) : null;
+    }
+    function setCurrentLogoId(id) {
+      if (!id) return;
+      logoSelectEl.value = String(id);
+    }
+    function getCurrentLogoObj() {
+      const id = getCurrentLogoId();
+      return logoObjects.find(l => l.id === id) || null;
+    }
+
+    function syncLogoUI() {
+      const l = getCurrentLogoObj();
+      const disabled = !l;
+      [logoXInput, logoYInput, logoWidthInput, logoRotationInput, removeLogoBtn].forEach(el => el.disabled = disabled);
+      if (!l) {
+        logoXInput.value = '';
+        logoYInput.value = '';
+        logoWidthInput.value = '';
+        logoRotationInput.value = 0;
+        return;
+      }
+      logoXInput.value = l.x;
+      logoYInput.value = l.y;
+      logoWidthInput.value = l.width;
+      logoRotationInput.value = l.rotation || 0;
+    }
+
+    logoFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const src = String(reader.result || '');
+        const img = new Image();
+        img.onload = () => {
+          const canvasW = parseInt(canvasWidthEl.value || '800', 10);
+          const qrSize = parseInt(qrSizeEl.value || '600', 10);
+          const defaultWidth = Math.min(qrSize * 0.4, canvasW * 0.4);
+          const newLogo = {
+            id: logoIdCounter++,
+            img,
+            src,
+            x: canvasW / 2,
+            y: parseInt(qrYEl.value || '150', 10) + qrSize + 20 + (defaultWidth / 4),
+            width: defaultWidth,
+            rotation: 0,
+            label: file.name
+          };
+          logoObjects.push(newLogo);
+          refreshLogoSelect();
+          setCurrentLogoId(newLogo.id);
+          syncLogoUI();
+          setStatus('Логотип добавлен.', true);
+          logoFileInput.value = '';
+        };
+        img.onerror = () => {
+          setStatus('Не удалось загрузить логотип.', false);
+        };
+        img.src = src;
+      };
+      reader.onerror = () => {
+        setStatus('Не удалось загрузить логотип.', false);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    removeLogoBtn.addEventListener('click', () => {
+      const id = getCurrentLogoId();
+      if (!id) return;
+      logoObjects = logoObjects.filter(l => l.id !== id);
+      refreshLogoSelect();
+      setStatus('Логотип удалён.', true);
+    });
+
+    logoSelectEl.addEventListener('change', () => {
+      syncLogoUI();
+    });
+
+    logoXInput.addEventListener('input', () => {
+      const l = getCurrentLogoObj();
+      if (!l) return;
+      l.x = parseFloat(logoXInput.value || '0');
+    });
+    logoYInput.addEventListener('input', () => {
+      const l = getCurrentLogoObj();
+      if (!l) return;
+      l.y = parseFloat(logoYInput.value || '0');
+    });
+    logoWidthInput.addEventListener('input', () => {
+      const l = getCurrentLogoObj();
+      if (!l) return;
+      l.width = parseFloat(logoWidthInput.value || '50');
+    });
+    logoRotationInput.addEventListener('input', () => {
+      const l = getCurrentLogoObj();
+      if (!l) return;
+      l.rotation = parseFloat(logoRotationInput.value || '0');
+    });
+
+
+    // ===== CSV ссылки (номер стола -> URL) =====
+    function stripQuotes(s) {
+      const t = (s ?? '').trim();
+      if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'"))) {
+        return t.slice(1, -1).trim();
+      }
+      return t;
+    }
+
+    function detectDelimiter(sampleLine) {
+      const candidates = [',', ';', '\t'];
+      let best = ',';
+      let bestCount = -1;
+      for (const d of candidates) {
+        const c = (sampleLine.split(d).length - 1);
+        if (c > bestCount) { bestCount = c; best = d; }
+      }
+      return best;
+    }
+
+    function parseLinksCsv(text) {
+      const lines = (text || '')
+        .split(/\r?\n/)
+        .map(l => l.trim())
+        .filter(l => l.length > 0);
+
+      if (lines.length === 0) return { map: new Map(), count: 0 };
+
+      const delimiter = detectDelimiter(lines[0]);
+      const map = new Map();
+
+      for (const line of lines) {
+        const parts = line.split(delimiter);
+        if (parts.length < 2) continue;
+
+        const rawNum = stripQuotes(parts[0]);
+        const rawUrl = stripQuotes(parts.slice(1).join(delimiter)); // на случай delimiter в URL после 2-го столбца
+
+        const num = parseInt(rawNum, 10);
+        if (!Number.isFinite(num)) continue; // пропускаем заголовки/мусор
+
+        const url = rawUrl.trim();
+        if (!url) continue;
+
+        map.set(num, url);
+      }
+      return { map, count: map.size };
+    }
+
+    function setCsvInfo(text, ok=true) {
+      if (!csvInfoEl) return;
+      csvInfoEl.textContent = text;
+      csvInfoEl.style.opacity = ok ? '0.85' : '1';
+    }
+
+    csvFileEl?.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      try {
+        const csvText = await file.text();
+        const { map, count } = parseLinksCsv(csvText);
+
+        csvLinksMap = map;
+        csvLinksLoaded = count > 0;
+
+        useCsvLinksEl.checked = csvLinksLoaded;
+        setCsvInfo(csvLinksLoaded
+          ? `Загружено: ${count} ссылок из CSV. Теперь QR будет брать URL из CSV (если для стола есть строка).`
+          : 'CSV прочитан, но ссылки не найдены. Проверьте, что в 1-м столбце номер, во 2-м — ссылка.', csvLinksLoaded);
+
+        setStatus(csvLinksLoaded ? 'CSV загружен.' : 'CSV прочитан, но данных не найдено.', csvLinksLoaded);
+      } catch (err) {
+        console.error(err);
+        csvLinksMap = new Map();
+        csvLinksLoaded = false;
+        useCsvLinksEl.checked = false;
+        setCsvInfo('Не удалось прочитать CSV файл.', false);
+        setStatus('Ошибка чтения CSV.', false);
+      }
+    });
+
+    useCsvLinksEl?.addEventListener('change', () => {
+      if (!csvLinksLoaded && useCsvLinksEl.checked) {
+        useCsvLinksEl.checked = false;
+        setStatus('Сначала загрузите CSV файл.', false);
+      } else {
+        setStatus(useCsvLinksEl.checked ? 'Используются ссылки из CSV.' : 'Используется базовый URL + номер стола.', true);
+      }
+    });
+
+    clearCsvEl?.addEventListener('click', () => {
+      csvLinksMap = new Map();
+      csvLinksLoaded = false;
+      if (csvFileEl) csvFileEl.value = '';
+      if (useCsvLinksEl) useCsvLinksEl.checked = false;
+      setCsvInfo('CSV не загружен — будет использоваться базовый URL + номер стола.');
+      setStatus('CSV очищен.', true);
+    });
+
+    function getSavedDesigns() {
+      try {
+        return JSON.parse(localStorage.getItem(savedDesignsStorageKey) || '[]');
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function persistSavedDesigns(designs) {
+      localStorage.setItem(savedDesignsStorageKey, JSON.stringify(designs));
+    }
+
+    function refreshSavedDesignSelect(selectedId) {
+      if (!savedDesignSelectEl) return;
+      const designs = getSavedDesigns();
+      savedDesignSelectEl.innerHTML = '';
+
+      if (designs.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Нет сохранённых дизайнов';
+        savedDesignSelectEl.appendChild(opt);
+      } else {
+        designs.forEach(design => {
+          const opt = document.createElement('option');
+          opt.value = design.id;
+          opt.textContent = design.name;
+          savedDesignSelectEl.appendChild(opt);
+        });
+      }
+
+      savedDesignSelectEl.value = selectedId || (designs[0] && designs[0].id) || '';
+      const disabled = designs.length === 0;
+      if (loadDesignBtn) loadDesignBtn.disabled = disabled;
+      if (deleteDesignBtn) deleteDesignBtn.disabled = disabled;
+    }
+
+    function collectCurrentDesign() {
+      return {
+        values: {
+          canvasWidth: canvasWidthEl.value,
+          canvasHeight: canvasHeightEl.value,
+          qrContentType: qrContentTypeEl.value,
+          wifiSsid: wifiSsidEl.value,
+          wifiPassword: wifiPasswordEl.value,
+          wifiAuthType: wifiAuthTypeEl.value,
+          wifiHidden: wifiHiddenEl.checked,
+          baseUrl: baseUrlEl.value,
+          useCsvLinks: useCsvLinksEl.checked,
+          tableCount: tableCountEl.value,
+          previewIndex: previewIndexEl.value,
+          bgColor: bgColorEl.value,
+          defaultTextColor: defaultTextColorEl.value,
+          qrColor: qrColorEl.value,
+          qrSize: qrSizeEl.value,
+          qrX: qrXEl.value,
+          qrY: qrYEl.value,
+          qrCenterLogoEnabled: qrCenterLogoEnabledEl.checked,
+          qrCenterLogoPercent: qrCenterLogoPercentEl.value,
+          qrCenterLogoPaddingPercent: qrCenterLogoPaddingPercentEl.value,
+          qrCenterLogoRadius: qrCenterLogoRadiusEl.value
+        },
+        csvLinks: Array.from(csvLinksMap.entries()),
+        textObjects: textObjects.map(t => ({ ...t })),
+        logoObjects: logoObjects.map(l => ({
+          id: l.id,
+          src: l.src || (l.img && l.img.src) || '',
+          x: l.x,
+          y: l.y,
+          width: l.width,
+          rotation: l.rotation || 0,
+          label: l.label || 'Лого'
+        }))
+      };
+    }
+
+    function syncQrContentModeUI() {
+      if (qrContentTypeEl.value === 'wifi') {
+        qrUrlSettingsEl.classList.add('hidden');
+        qrWifiSettingsEl.classList.remove('hidden');
+      } else {
+        qrUrlSettingsEl.classList.remove('hidden');
+        qrWifiSettingsEl.classList.add('hidden');
+      }
+    }
+
+    function loadLogoFromSaved(savedLogo) {
+      return new Promise(resolve => {
+        if (!savedLogo.src) {
+          resolve(null);
+          return;
+        }
+        const img = new Image();
+        img.onload = () => resolve({
+          id: savedLogo.id,
+          img,
+          src: savedLogo.src,
+          x: savedLogo.x,
+          y: savedLogo.y,
+          width: savedLogo.width,
+          rotation: savedLogo.rotation || 0,
+          label: savedLogo.label || 'Лого'
+        });
+        img.onerror = () => resolve(null);
+        img.src = savedLogo.src;
+      });
+    }
+
+    async function applyDesignSnapshot(snapshot) {
+      const values = snapshot.values || {};
+
+      canvasWidthEl.value = values.canvasWidth ?? canvasWidthEl.value;
+      canvasHeightEl.value = values.canvasHeight ?? canvasHeightEl.value;
+      qrContentTypeEl.value = values.qrContentType ?? qrContentTypeEl.value;
+      wifiSsidEl.value = values.wifiSsid ?? '';
+      wifiPasswordEl.value = values.wifiPassword ?? '';
+      wifiAuthTypeEl.value = values.wifiAuthType ?? 'WPA';
+      wifiHiddenEl.checked = !!values.wifiHidden;
+      baseUrlEl.value = values.baseUrl ?? baseUrlEl.value;
+      tableCountEl.value = values.tableCount ?? tableCountEl.value;
+      previewIndexEl.value = values.previewIndex ?? previewIndexEl.value;
+      bgColorEl.value = values.bgColor ?? bgColorEl.value;
+      defaultTextColorEl.value = values.defaultTextColor ?? defaultTextColorEl.value;
+      qrColorEl.value = values.qrColor ?? qrColorEl.value;
+      qrSizeEl.value = values.qrSize ?? qrSizeEl.value;
+      qrXEl.value = values.qrX ?? qrXEl.value;
+      qrYEl.value = values.qrY ?? qrYEl.value;
+      qrCenterLogoEnabledEl.checked = !!values.qrCenterLogoEnabled;
+      qrCenterLogoPercentEl.value = values.qrCenterLogoPercent ?? qrCenterLogoPercentEl.value;
+      qrCenterLogoPaddingPercentEl.value = values.qrCenterLogoPaddingPercent ?? qrCenterLogoPaddingPercentEl.value;
+      qrCenterLogoRadiusEl.value = values.qrCenterLogoRadius ?? qrCenterLogoRadiusEl.value;
+
+      csvLinksMap = new Map(snapshot.csvLinks || []);
+      csvLinksLoaded = csvLinksMap.size > 0;
+      useCsvLinksEl.checked = !!values.useCsvLinks && csvLinksLoaded;
+      setCsvInfo(csvLinksLoaded
+        ? `Загружено из сохранённого дизайна: ${csvLinksMap.size} ссылок.`
+        : 'CSV не загружен — будет использоваться базовый URL + номер стола.');
+      syncQrContentModeUI();
+
+      textObjects = (snapshot.textObjects || []).map(t => ({ ...t }));
+      textIdCounter = Math.max(1, ...textObjects.map(t => Number(t.id) || 0)) + 1;
+
+      const savedLogos = snapshot.logoObjects || [];
+      const restoredLogos = await Promise.all(savedLogos.map(loadLogoFromSaved));
+      logoObjects = restoredLogos.filter(Boolean);
+      logoIdCounter = Math.max(1, ...logoObjects.map(l => Number(l.id) || 0)) + 1;
+
+      refreshTextSelect();
+      refreshLogoSelect();
+      await updatePreview();
+    }
+
+    saveDesignBtn?.addEventListener('click', () => {
+      const name = (designNameEl.value || '').trim() || `Дизайн ${new Date().toLocaleString('ru-RU')}`;
+      const designs = getSavedDesigns();
+      const design = {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+        name,
+        createdAt: new Date().toISOString(),
+        snapshot: collectCurrentDesign()
+      };
+
+      designs.unshift(design);
+      persistSavedDesigns(designs);
+      refreshSavedDesignSelect(design.id);
+      setStatus(`Дизайн «${name}» сохранён.`, true);
+    });
+
+    loadDesignBtn?.addEventListener('click', async () => {
+      const designs = getSavedDesigns();
+      const design = designs.find(item => item.id === savedDesignSelectEl.value);
+      if (!design) {
+        setStatus('Выберите сохранённый дизайн.', false);
+        return;
+      }
+      if (designNameEl) designNameEl.value = design.name;
+      await applyDesignSnapshot(design.snapshot || {});
+      setStatus(`Дизайн «${design.name}» загружен.`, true);
+    });
+
+    deleteDesignBtn?.addEventListener('click', () => {
+      const designs = getSavedDesigns();
+      const selectedId = savedDesignSelectEl.value;
+      const design = designs.find(item => item.id === selectedId);
+      const nextDesigns = designs.filter(item => item.id !== selectedId);
+      persistSavedDesigns(nextDesigns);
+      refreshSavedDesignSelect();
+      setStatus(design ? `Дизайн «${design.name}» удалён.` : 'Дизайн удалён.', true);
+    });
+
+    
+    function escapeWifiText(s) {
+      return (s || '').replace(/([\\;,":])/g, '\\$1');
+    }
+
+    function buildWifiPayload() {
+      if (!wifiSsidEl) {
+        throw new Error('Элементы Wi-Fi не инициализированы.');
+      }
+      const ssid = wifiSsidEl.value.trim();
+      const password = (wifiPasswordEl.value || '').trim();
+      const auth = (wifiAuthTypeEl.value || 'WPA');
+      const hidden = !!(wifiHiddenEl && wifiHiddenEl.checked);
+
+      if (!ssid) {
+        throw new Error('Укажи SSID (название сети Wi-Fi) для QR-кода.');
+      }
+
+      const escSsid = escapeWifiText(ssid);
+      const escPass = escapeWifiText(password);
+
+      let payload;
+      if (auth === 'nopass') {
+        // открытая сеть
+        payload = `WIFI:T:nopass;S:${escSsid};H:${hidden ? 'true' : 'false'};;`;
+      } else {
+        // WPA / WEP
+        payload = `WIFI:T:${auth};S:${escSsid};P:${escPass};H:${hidden ? 'true' : 'false'};;`;
+      }
+
+      const label = `Wi-Fi: ${ssid}${auth === 'nopass' ? ' (без пароля)' : ''}`;
+      return { payload, label };
+    }
+
+    async function generateSingleTableImage(tableNumber) {
+      const canvasWidth = Math.max(200, Math.min(8000, parseInt(canvasWidthEl.value || '800', 10)));
+      const canvasHeight = Math.max(200, Math.min(8000, parseInt(canvasHeightEl.value || '1200', 10)));
+      const bgColor = bgColorEl.value || '#ffffff';
+
+      const baseUrl = baseUrlEl.value.trim();
+      const tableCount = Math.max(1, Math.min(999, parseInt(tableCountEl.value || '1', 10)));
+      const qrColor = qrColorEl.value || '#000000';
+      const qrSize = Math.max(100, Math.min(3000, parseInt(qrSizeEl.value || '600', 10)));
+      const qrX = parseFloat(qrXEl.value || '0');
+      const qrY = parseFloat(qrYEl.value || '0');
+
+      const n = Math.max(1, Math.min(tableCount, parseInt(tableNumber || '1', 10)));
+
+      let qrValue;
+      let displayLabel;
+
+      if (qrContentTypeEl && qrContentTypeEl.value === 'wifi') {
+        const { payload, label } = buildWifiPayload();
+        qrValue = payload;
+        displayLabel = label;
+      } else {
+        let url;
+        if (csvLinksLoaded && useCsvLinksEl.checked && csvLinksMap.has(n)) {
+          url = csvLinksMap.get(n);
+        } else {
+          // Если в базовом URL есть {n} — подставляем номер стола вручную
+          // Если {n} нет — используем baseUrl как есть
+          url = baseUrl.includes('{n}')
+            ? baseUrl.replaceAll('{n}', String(n))
+            : baseUrl;
+        }
+        qrValue = url;
+        displayLabel = url;
+      }
+
+      const qrCanvas = document.createElement('canvas');
+      qrCanvas.width = qrSize;
+      qrCanvas.height = qrSize;
+      await QRCode.toCanvas(qrCanvas, qrValue, {
+        margin: 1,
+        width: qrSize,
+        color: {
+          dark: qrColor,
+          light: bgColor
+        }
+      });
+
+      // Встраиваем логотип в центр QR (по желанию)
+      const centerLogoEnabled = !!(qrCenterLogoEnabledEl && qrCenterLogoEnabledEl.checked);
+      const activeLogo = (typeof getCurrentLogoObj === 'function') ? getCurrentLogoObj() : null;
+      if (centerLogoEnabled && activeLogo && activeLogo.img) {
+        const percent = Math.max(0.10, Math.min(0.40, parseFloat(qrCenterLogoPercentEl.value || '22') / 100));
+        const padPercent = Math.max(0, Math.min(0.60, parseFloat(qrCenterLogoPaddingPercentEl.value || '18') / 100));
+        const radius = Math.max(0, Math.min(80, parseFloat(qrCenterLogoRadiusEl.value || '14')));
+
+        const logoBox = qrSize * percent;
+        const pad = logoBox * padPercent;
+        const box = logoBox + pad * 2;
+
+        const cx = qrSize / 2;
+        const cy = qrSize / 2;
+        const x0 = cx - box / 2;
+        const y0 = cy - box / 2;
+
+        const qrCtx = qrCanvas.getContext('2d');
+
+        // Подложка под логотип (в цвет фона), чтобы QR лучше сканировался
+        qrCtx.save();
+        qrCtx.imageSmoothingEnabled = true;
+        qrCtx.imageSmoothingQuality = 'high';
+        roundRectPath(qrCtx, x0, y0, box, box, radius);
+        qrCtx.fillStyle = bgColor;
+        qrCtx.fill();
+        qrCtx.restore();
+
+        // Рисуем логотип по пропорциям внутрь logoBox
+        const img = activeLogo.img;
+        const iw = img.width || 1;
+        const ih = img.height || 1;
+        const ar = iw / ih;
+
+        let dw = logoBox, dh = logoBox;
+        if (ar >= 1) { dh = logoBox / ar; } else { dw = logoBox * ar; }
+
+        qrCtx.save();
+        qrCtx.imageSmoothingEnabled = true;
+        qrCtx.imageSmoothingQuality = 'high';
+        qrCtx.drawImage(img, cx - dw / 2, cy - dh / 2, dw, dh);
+        qrCtx.restore();
+      }
+
+
+      const canvas = document.createElement('canvas');
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+      ctx.drawImage(qrCanvas, qrX, qrY);
+
+      logoObjects.forEach(l => {
+        if (!l.img) return;
+        const ratio = l.img.width > 0 ? (l.img.height / l.img.width) : 1;
+        const logoHeight = l.width * ratio;
+        ctx.save();
+        ctx.translate(l.x, l.y);
+        const rad = (l.rotation || 0) * Math.PI / 180;
+        ctx.rotate(rad);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(l.img, -l.width / 2, -logoHeight / 2, l.width, logoHeight);
+        ctx.restore();
+      });
+
+      textObjects.forEach(t => {
+        const text = (t.template || '').replace('{n}', String(n));
+        const fontFamily = t.font === 'system-ui'
+          ? "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+          : t.font;
+        ctx.save();
+        ctx.translate(t.x, t.y);
+        const rad = (t.rotation || 0) * Math.PI / 180;
+        ctx.rotate(rad);
+        ctx.font = `bold ${t.size || 40}px ${fontFamily}`;
+        ctx.fillStyle = t.color || '#000000';
+        ctx.textAlign = (t.align || 'center');
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, 0, 0);
+        ctx.restore();
+      });
+
+      const dataUrl = canvas.toDataURL('image/png');
+      return { dataUrl, url: displayLabel, n };
+    }
+
+  
+    async function updatePreview() {
+      try {
+        const tableNumber = parseInt(previewIndexEl.value || '1', 10);
+        const { dataUrl, url, n } = await generateSingleTableImage(tableNumber);
+        previewImg.src = dataUrl;
+        previewTableNumberEl.textContent = String(n);
+        pillUrlEl.textContent = url;
+        const cw = parseInt(canvasWidthEl.value || '800', 10);
+        const ch = parseInt(canvasHeightEl.value || '1200', 10);
+        pillCanvasEl.textContent = `${cw}×${ch} px`;
+        
+      const previewInner = document.querySelector('.preview-inner');
+      if (previewInner) previewInner.style.aspectRatio = `${cw}/${ch}`;
+setStatus('Предпросмотр обновлён.', true);
+      } catch (err) {
+        console.error(err);
+        setStatus('Ошибка при генерации предпросмотра.', false);
+      }
+    }
+
+    previewBtn.addEventListener('click', () => {
+      updatePreview();
+    });
+
+    downloadOneBtn.addEventListener('click', async () => {
+      try {
+        setStatus('Генерация PNG для выбранного стола...', true);
+        downloadOneBtn.disabled = true;
+        const tableNumber = parseInt(previewIndexEl.value || '1', 10);
+        const { dataUrl, n } = await generateSingleTableImage(tableNumber);
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = `table_${n}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setStatus(`PNG для стола ${n} скачан.`, true);
+      } catch (err) {
+        console.error(err);
+        setStatus('Ошибка при скачивании PNG.', false);
+      } finally {
+        downloadOneBtn.disabled = false;
+      }
+    });
+
+    downloadAllBtn.addEventListener('click', async () => {
+      try {
+        const tableCount = Math.max(1, Math.min(999, parseInt(tableCountEl.value || '1', 10)));
+        setStatus(`Генерация ZIP для ${tableCount} столов...`, true);
+        downloadAllBtn.disabled = true;
+        const zip = new JSZip();
+        for (let i = 1; i <= tableCount; i++) {
+          const { dataUrl } = await generateSingleTableImage(i);
+          const base64Data = dataUrl.split(',')[1];
+          zip.file(`table_${i}.png`, base64Data, { base64: true });
+        }
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `tables_qr_${tableCount}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setStatus('ZIP со всеми столами скачан.', true);
+      } catch (err) {
+        console.error(err);
+        setStatus('Ошибка при генерации ZIP.', false);
+      } finally {
+        downloadAllBtn.disabled = false;
+      }
+    });
+
+    textObjects.push(createDefaultText());
+    refreshTextSelect();
+    refreshLogoSelect();
+    refreshSavedDesignSelect();
+    updatePreview();
+  </script>
+</body>
+</html>
